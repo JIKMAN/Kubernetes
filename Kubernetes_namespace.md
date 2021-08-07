@@ -41,3 +41,216 @@ isolation을 원할 경우, 쿠버네티스 클러스터를 다중화/이중화 
 일반적인 Authorization은 **ABAC**(Attribute-based access control)과 **RBAC**(Role-based access control)로 구분됩니다.
 **ABAC**은 속성 기반의 권한 관리로, 사용자/그룹/요청 경로/네임스페이스 등으로 권한을 설정합니다. 여기서 언급된 접근 권한은 ABAC을 의미합니다.
 **RBAC**의 경우에는 역할 기반 권한 관리로, 사용자와 역할을 별개로 선언하고 둘을 binding 하여 사용자에게 권한을 부여하는 방식으로 구현됩니다. 일반적으로 RBAC이 더 많이 사용됩니다.
+
+---
+
+## Namespace Command
+
+#### `kubectl get nodes`
+
+```bash
+# 현재 node 상태 확인
+
+controlplane $ kubectl get nodes 
+NAME           STATUS   ROLES    AGE     VERSION
+controlplane   Ready    master   6m51s   v1.18.0
+node01         Ready    <none>   6m19s   v1.18.0
+```
+
+#### `kubectl get namespaces`
+
+처음 namespace를 조회하면 default로 들어있는 namespace들을 확인할 수 있다.
+
+```bash
+# namespace 상태 확인
+
+controlplane $ kubectl get namespaces
+NAME              STATUS   AGE
+default           Active   7m52s
+kube-node-lease   Active   7m54s
+kube-public       Active   7m54s
+kube-system       Active   7m54s
+```
+
+#### 특정 namespace내의 Pod 확인
+
+#### `kubectl get pod --namespace {namespace명}`
+
+```bash
+# namespace를 따로 지정하지 않았을 때 default로 default namespace가 지정된다.
+# 아래 세가지는 모두 같은 명령어다.
+controlplane $ kubectl get pod
+No resources found in default namespace.
+
+controlplane $ kubectl get pod --namespace default
+No resources found in default namespace.
+
+controlplane $ kubectl get pod -n default
+No resources found in default namespace.
+```
+
+### yml파일을 이용해 Pod 생성
+
+#### `kubectl create -f {yaml file명}`
+
+```yaml
+# nginx.yaml
+
+apiVersion: v1
+kind: Pod 		# Pod를 만드는 yaml파일 구성
+metadata:
+  name: mypod
+spec:
+  containers:
+   - image: nginx:1.14
+     name: nginx
+     ports:
+     - containerPort: 80
+     - containerPort: 443
+```
+
+해당 yml파일로 pod를 생성한 후 pod를 조회해보면
+
+```bash
+# nginx.yaml file을 이용해 pod를 생성
+controlplane $ kubectl create -f nginx.yaml
+pod/mypod created
+
+# namespace를 따로 지정해 주지 않았기 때문에 default namespace에 생성된 것을 확인할 수 있음
+controlplane $ kubectl get pods -n default
+NAME    READY   STATUS              RESTARTS   AGE
+mypod   0/1     ContainerCreating   0          12s
+
+# test02 namespace를 지정하여 pod를 생성
+controlplane $ kubectl create -f nginx.yaml -n test02
+pod/mypod created
+
+# test02 namespace내에 pod가 생성됨
+controlplane $ kubectl get pod -n test02
+NAME    READY   STATUS    RESTARTS   AGE
+mypod   1/1     Running   0          26s
+
+# 만약 nginx.yaml파일 자체에 namespace를 test02로 설정해 주게되면
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mypod
+  namespace: test02
+spec:
+  containers:
+   - image: nginx:1.14
+     name: nginx
+     ports:
+     - containerPort: 80
+     - containerPort: 443
+     
+# 따로 namespace를 지정해주지 않고 create 하더라도
+controlplane $ kubectl create -f nginx.yaml 
+pod/mypod created
+# yaml파일에 namespace로 지정했던 test02 namespace에 pod가 생성됨
+controlplane $ kubectl get pods -n test02
+NAME    READY   STATUS    RESTARTS   AGE
+mypod   1/1     Running   0          15s
+```
+
+
+
+### kube-system namespace 살펴보기
+
+```bash
+controlplane $ kubectl get pods -n kube-system
+NAME                                       READY   STATUS             RESTARTS   AGE
+# coreDNS
+coredns-66bff467f8-6s4rv                   1/1     Running            0          19m
+coredns-66bff467f8-zj5tl                   1/1     Running            0          19m
+# controlplane component - etcd
+etcd-controlplane                          1/1     Running            0          19m
+# 가상환경을 제공해주는 katacoda 서비스 (katacoda를 통해 실습 중이기 때문에..)
+katacoda-cloud-provider-7d7b85c764-zl9d6   0/1     CrashLoopBackOff   7          19m
+# controlplane component - kubeapiserver
+kube-apiserver-controlplane                1/1     Running            0          19m
+# controlplane component - kube controller manager
+kube-controller-manager-controlplane       1/1     Running            0          19m
+# network plugin으로 flannel 사용 중
+kube-flannel-ds-amd64-r6qqn                1/1     Running            0          19m
+kube-flannel-ds-amd64-tgwjn                1/1     Running            0          19m
+# multi-master를 지원해주는 keepalive 기능
+kube-keepalived-vip-8wc5w                  1/1     Running            0          19m
+# network proxy
+kube-proxy-csqrg                           1/1     Running            0          19m
+kube-proxy-tns8h                           1/1     Running            0          19m
+# controlplane component - kube scheduler
+kube-scheduler-controlplane                1/1     Running            0          19m
+```
+
+
+
+### namespace 생성
+
+```bash
+# test01 namespace를 생성
+controlplane $ kubectl create namespace test01
+namespace/test01 created
+```
+
+### --dry-run
+
+`--dry-run` 플래그를 사용하여 실제로 제출하지 않고 클러스터로 보낼 오브젝트를 미리 볼 수 있다.
+
+```bash
+controlplane $ kubectl create namespace test02 --dry-run -o yaml
+W0807 16:08:48.038540   14845 helpers.go:535] --dry-run is deprecated and can be replaced with --dry-run=client.
+apiVersion: v1
+kind: Namespace
+metadata:
+  creationTimestamp: null
+  name: test02
+spec: {}
+status: {}
+```
+
+`kubectl create namespace test02 --dry-run -o yaml > test02-ns.yaml`
+
+* 확인한 오브젝트를 통해 yaml파일로 생성
+
+```bash
+controlplane $ kubectl create namespace test02 --dry-run -o yaml > test02-ns.yaml
+W0807 16:14:58.605892   17204 helpers.go:535] --dry-run is deprecated and can be replaced with --dry-run=client.
+
+# test02 namespace 생성을 위한 구성파일인 test02-ns.yaml파일이 생성됨
+controlplane $ ls
+go  nginx.yaml  test02-ns.yaml
+```
+
+```yaml
+# 해당 파일을 살펴보면 다음과 같다.
+controlplane $ vim test02-ns.yaml
+
+apiVersion: v1
+kind: Namespace 	# namespace를 만드는 yaml파일 구성
+metadata:
+  creationTimestamp: null
+  name: test02
+spec: {}
+status: {}
+```
+
+* 만든 yaml파일을 통해 namespace를 생성
+
+```bash
+controlplane $ kubectl create -f test02-ns.yaml
+namespace/test02 created
+
+# test02 namespace가 생성된 것을 확인할 수 있음
+controlplane $ kubectl get namespace
+NAME              STATUS   AGE
+default           Active   37m
+kube-node-lease   Active   38m
+kube-public       Active   38m
+kube-system       Active   38m
+test01            Active   10m
+`test02            Active   7s`
+```
+
+
+
