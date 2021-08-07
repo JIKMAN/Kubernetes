@@ -95,3 +95,10 @@ https://subicura.com/k8s/
 * ### 클러스터-레벨 로깅
 
   검색/열람 인터페이스와 함께 중앙 로그 저장소에 컨테이너 로그를 저장
+
+---
+
+## 실습환경 구축
+
+* minikube install (linux)
+
