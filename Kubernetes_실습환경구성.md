@@ -114,32 +114,3 @@ kubectl version
 ```
 
 
-
-
-
-
-
-
-
-### 워드프레스 배포
-
-1. docker-compose를 이용한 배포
-
-```yaml
-version: "3"
-
-services:
-  wordpress:
-    image: wordpress:5.5.3-apache
-    environment:
-      WORDPRESS_DB_HOST: mysql
-      WORDPRESS_DB_PASSWORD: password
-    ports:
-      - "30000:80"
-
-  mysql:
-    image: mysql:5.6
-    environment:
-      MYSQL_ROOT_PASSWORD: password
-```
-

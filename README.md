@@ -12,6 +12,8 @@ https://subicura.com/k8s/
 
 https://subicura.com/2019/05/19/kubernetes-basic-1.html
 
+https://www.youtube.com/watch?v=6n5obRKsCRQ&list=PLApuRlvrZKohaBHvXAOhUD-RxD0uQ3z0c&ab_channel=TTABAE-LEARN
+
 ## 쿠버네티스가 왜 필요한가
 
 **쿠버네티스는 컨테이너를 쉽고 빠르게 배포/확장하고 관리를 자동화해주는 오픈소스 플랫폼입니다.**
@@ -60,9 +62,7 @@ spec:
 
 오브젝트의 명세(spec)는 YAML 파일(JSON도 가능하다고 하지만 잘 안 씀)로 정의하고 여기에 오브젝트의 종류와 원하는 상태를 입력합니다. 이러한 명세는 생성, 조회, 삭제로 관리할 수 있기 때문에 REST API로 쉽게 노출할 수 있습니다. 접근 권한 설정도 같은 개념을 적용하여 누가 어떤 오브젝트에 어떤 요청을 할 수 있는지 정의할 수 있습니다.
 
-## Kubernetes Comonents
-
-### Architecture
+## Architecture
 
 컨테이너는 아주 심플하고 우아하게 동작합니다. run을 하면 실행되고 stop을 하면 멈춥니다. 서버-클라이언트 구조를 안다면 컨테이너를 관리하는 에이전트를 만들고 중앙에서 API를 이용하여 원격으로 관리하는 모습을 쉽게 그려볼 수 있습니다.
 
@@ -86,11 +86,11 @@ spec:
 
 #### Kubectl
 
-API 서버는 json 또는 protobuf 형식을 이용한 http 통신을 지원합니다. 이 방식을 그대로 쓰면 불편하므로 보통 `kubectl`이라는 명령행 도구를 사용합니다. 앞으로 엄청나게 많이 ~~지겹게~~ 사용할 예정입니다. 어떻게 읽어야 할지 난감한데 [공식적](https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.9.md#kubectl)으로 큐브컨트롤(cube control)이라고 읽지만 큐브씨티엘, 쿱컨트롤, 쿱씨티엘등도 많이 쓰입니다.
+API 서버는 json 또는 protobuf 형식을 이용한 http 통신을 지원합니다. 이 방식을 그대로 쓰면 불편하므로 보통 `kubectl`이라는 명령행 도구를 사용합니다. 앞으로 엄청나게 많이 ~~지겹게~~ 사용할 예정입니다. 어떻게 읽어야 할지 난감한데 공식적으로 큐브컨트롤(cube control)이라고 읽지만 큐브씨티엘, 쿱컨트롤, 쿱씨티엘등도 많이 쓰입니다.
 
+## Kubernetes Comonents
 
-
->  ### Master 구성 요소
+>  ### Master Component (Control Plane)
 
 
 
@@ -127,7 +127,7 @@ RAFT 알고리즘을 이용한 key-value 저장소입니다. 여러 개로 분�
   
   
 
->  ### 노드 구성요소
+>  ### Node Component
 >
 > 노드 컴포넌트는 동작 중인 파드를 유지시키고 쿠버네티스 런타임 환경을 제공하며, 모든 노드 상에서 동작한다.
 
@@ -144,8 +144,8 @@ RAFT 알고리즘을 이용한 key-value 저장소입니다. 여러 개로 분�
 * ### Container Runtime
 
   컨테이너 실행을 담당하는 소프트웨어
-  
-  
+
+---
 
 ### Pod 생성 과정
 
@@ -174,8 +174,17 @@ RAFT 알고리즘을 이용한 key-value 저장소입니다. 여러 개로 분�
 -  생성되지 않은 Pod이 있으면 명세를 보고 Pod을 생성
 -  Pod의 상태를 주기적으로 API Server에 전달
 
-이제 복잡했던 그림이 이해되시나요? 위의 예제는 ReplicaSet에 대해 다뤘지만 모든 노드에 Pod을 배포하는 DaemonSet도 동일한 방식으로 동작합니다. DaemonSet controller와 Scheduler가 전체 노드에 대해 Pod을 할당하면 kubelet이 자기 노드에 할당된 Pod을 생성하는 식입니다.
-
 ---
 
-### 
+## Add-on
+
+* 네트워크 애드온
+  * CNI - weave, calico, flaneld, kube-route ...
+* DNS 애드온
+  * coreDNS
+* 대시보드 UI 애드온
+* 컨테이너 자원 모니터링
+  * cAdvisor (kubelet에 기본으로 포함)
+* 클러스터 로깅
+  * 컨테이너 로그, k8s 운영 로그들을 수집해서 중앙화
+  * ELK(ElasticSearch, Logstash, Kibana), Datadog ...
