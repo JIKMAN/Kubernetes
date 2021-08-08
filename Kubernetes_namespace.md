@@ -155,6 +155,28 @@ mypod   1/1     Running   0          15s
 
 
 
+### Pod/namespace 삭제하기
+
+#### `delete`
+
+```bash
+# test02 namespace에 있는 mypod라는 pod를 삭제
+controlplane $ kubectl delete pods mypod -b test02
+
+pod "mypod" deleted
+```
+
+```bash
+# test02 namespace 삭제 (안에있는 pod도 전부 삭제됌)
+controlplane $ kubectl delete namespaces test02
+
+namespace "test02" deleted
+```
+
+
+
+
+
 ### kube-system namespace 살펴보기
 
 ```bash
