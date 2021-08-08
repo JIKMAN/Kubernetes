@@ -254,3 +254,78 @@ test01            Active   10m
 
 
 
+### base namespace 지정하기 (namespace switch)
+
+매번 명령어에 namespace를 지정하기 귀찮을 때는, 주로 사용하는 namespace를 base로 지정해 놓고 사용하면 편하다.
+
+그럴때는 k8s의 config에 바꾸고자 하는 namespace를 등록해야 하며, 그 정보를 담고있는 것이 context다.
+
+* `config` 살펴보기
+
+```bash
+controlplane $ kubectl config view
+
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: DATA+OMITTED
+    server: https://172.17.0.68:6443
+  name: kubernetes
+contexts:
+- context:  # 현재 context의 정보
+    cluster: kubernetes # 클러스터명
+    user: kubernetes-admin # 유저명 
+  name: kubernetes-admin@kubernetes # 현재 context 이름
+current-context: kubernetes-admin@kubernetes
+kind: Config
+preferences: {}
+users:
+- name: kubernetes-admin
+  user:
+    client-certificate-data: REDACTED
+    client-key-data: REDACTED
+```
+
+* test01@k8s 이라는 context를 만들기
+
+`config set-context {임의의 context name} --cluster={사용하고자 하는 cluster명} \`
+
+`--user={유저명} --namespace={base로 지정할 namespace명}`
+
+```bash
+controlplane $ kubectl config set-context test01@k8s --cluster=kubernetes --user=kubernetes-admin --namespace=test01
+
+Context "test01@k8s" created.
+```
+
+* base namespace 변경하기
+
+  `kubectl use-context {context명}`
+
+```bash
+# 변경할 namespace 정보를 담고있는 context를 지정한다.
+controlplane $ kubectl use-context test01@k8s
+
+switched to context "test01@k8s"
+```
+
+* 현재 context 확인하기
+
+   `kubectl config current-context`
+
+```bash
+# 현재 default namespace가 test01@k8s임을 확인 가능
+controlplane $ kubectl config current-context
+
+test01@k8s
+```
+
+```bash
+# namespace 지정 없이 `get pod`명령어를 사용해도 default로 test01이 설정되있는 것 확인 가능
+controlplane $ kubectl get pods
+
+No resources found in test01 namespace.
+```
+
+
+
