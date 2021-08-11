@@ -108,6 +108,8 @@ RAFT 알고리즘을 이용한 key-value 저장소입니다. 여러 개로 분�
 
 ### 스케줄러, 컨트롤러
 
+![컨트롤러](https://subicura.com/assets/article_images/2019-05-19-kubernetes-basic-1/workload.png)
+
 * ### kube-scheduler
 
   스케줄러는 할당되지 않은 Pod을 여러 가지 조건(필요한 자원, 라벨)에 따라 적절한 노드 서버에 할당해주는 모듈입니다.
