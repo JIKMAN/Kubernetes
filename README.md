@@ -190,3 +190,9 @@ RAFT 알고리즘을 이용한 key-value 저장소입니다. 여러 개로 분�
 * 클러스터 로깅
   * 컨테이너 로그, k8s 운영 로그들을 수집해서 중앙화
   * ELK(ElasticSearch, Logstash, Kibana), Datadog ...
+
+
+
+### Multi-master - Highly Available Kubernetes cluster 구성
+
+![image-20210811154702440](./img/HA.png)
